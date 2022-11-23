@@ -110,20 +110,29 @@ public class XML_TO_JSON extends DefaultHandler {
             else if (qName.equals("TypeOfAttack")){
                 String name = attributes.getValue("name");
                 DOTA.getAttributes().get(DOTA.returnLength()-1).addTypeOfAttack(name);
-                //DOTA.addAttribute(name);
             }
             else if (qName.equals("Character")){
                 String name = attributes.getValue("name");
+
                 int complexity = Integer.parseInt(attributes.getValue("complexity"));
+
                 DOTA.getAttributes().get(DOTA.returnLength()-1).getTypeOfAttacks()
-                        .get(DOTA.getAttributes().get(DOTA.returnLength()-1).returnLength()-1).addGame(name,complexity);
+                        .get(DOTA.getAttributes().get(DOTA.returnLength()-1).returnLength()-1).addCharacter(name,complexity);
             }
             else if (qName.equals("Role")){
                 String name = attributes.getValue("name");
-                DOTA.getAttributes().get(DOTA.returnLength()-1).getTypeOfAttacks()
-                        .get(DOTA.getAttributes().get(DOTA.returnLength()-1).returnLength()-1).getCharacters()
-                        .get(DOTA.getAttributes().get(DOTA.returnLength()-1).getTypeOfAttacks().
-                                get(DOTA.getAttributes().get(DOTA.returnLength()-1).returnLength()-1).returnLength()-1).addRole(name);
+
+                int DOTAListLength = DOTA.returnLength()-1;
+
+                XMLAttribute attribute = DOTA.getAttributes().get(DOTAListLength);
+                int attributeListLength = attribute.returnLength()-1;
+
+                XMLTypeOfAttack typeOfAttack = attribute.getTypeOfAttacks().get(attributeListLength);
+                int TypeOfAttackListLength = typeOfAttack.returnLength()-1;
+
+                XMLcharacter character = typeOfAttack.getCharacters().get(TypeOfAttackListLength);
+                character.addRole(name);
+
             }
         }
     }

@@ -128,7 +128,7 @@ public class JSON_TO_XML {
                 XMLtype = findType(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks());
 
                 //add game
-                XMLtype.addGame(jsoNcharacter.getName(), jsoNcharacter.getComplexity());
+                XMLtype.addCharacter(jsoNcharacter.getName(), jsoNcharacter.getComplexity());
 
                 //set all platforms
                 XMLcharacter XMLcharacter = XMLtype.getCharacters().get(XMLtype.returnLength()-1);

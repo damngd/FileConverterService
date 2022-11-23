@@ -21,11 +21,12 @@ public class XMLTypeOfAttack {
         return characters;
     }
 
-    public void addGame(String name, int complexity){
-        characters.add(new XMLcharacter(name, complexity));
-    }
 
     public int returnLength(){
         return characters.size();
+    }
+
+    public void addCharacter(String character, int complexity) {
+        characters.add(new XMLcharacter(character,complexity));
     }
 }

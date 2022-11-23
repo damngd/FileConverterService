@@ -2,9 +2,11 @@ package main.FileConverter;
 
 import main.FileConverter.Creation.XML.XML;
 import main.FileConverter.Creation.XML.XMLAttribute;
+import main.FileConverter.Creation.XML.XMLTypeOfAttack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class FileConverter {
     public void convertToJson(String pathToXML, String pathToNewFile) {
@@ -23,6 +25,20 @@ public class FileConverter {
             ex.printStackTrace();
         }
     }
+
+    /*public void ST(){
+        XML w = XML_TO_JSON.getDota();
+        for(XMLAttribute attribute : w.getAttributes()){
+
+            List<String> type = new ArrayList<>();
+            type.add("RangeAndMelee");
+            attribute.addCharacter(type,"Troll Warlord", 1);
+            attribute.map();
+
+        }
+
+    }*/
+
 
 
 
