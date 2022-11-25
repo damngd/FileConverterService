@@ -49,24 +49,10 @@ public class XMLAttribute {
         stream.forEach(x -> x.setName(x.getName() + " " + add));
     }
 
-    public void map() {
-        Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
-        List<XMLcharacter> list = new ArrayList<>();
-
-        list.stream().filter(c -> c.getComplexity() == 1).map(XMLcharacter::getName).collect(Collectors.toList());
-    }
-
     public void getSorted() {
         Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
 
-        stream.sorted(Comparator.comparing(XMLTypeOfAttack::getName)).collect(Collectors.toList());
-    }
-
-    public void filterType() {
-        Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
-
-        stream.filter(x->x.getName()=="Melee").forEach(System.out::println);
-
+        stream.forEach(x->x.getCharacters().sort(Comparator.comparing(XMLcharacter::getName)));
     }
 
 }

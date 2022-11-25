@@ -25,22 +25,20 @@ public class JSON_TO_XML {
         JsonFactory factory = new JsonFactory();
         JsonParser parser = factory.createParser(fl);
 
-        //point to
         parser.nextToken();
         parser.nextToken();
-
 
         if (parser.nextToken() == JsonToken.START_ARRAY) {
-            //loop until token equal to "]"
+            //"]"
             while (parser.nextToken() != JsonToken.END_ARRAY) {
 
-                //checker if we're looking at "{" / "}"
+                //if"{" / "}"
                 if (parser.getCurrentName() == null)
                     continue;
                 String key = parser.getCurrentName();
 
                 if (key.equals("name")) {
-                    characters.addCharacter("place_holder", -1, "place_holder");
+                    characters.addCharacter("", -1, "");
                     parser.nextToken();
                     characters.returnLastCharacter().setName(parser.getText());
                 } else if (key.equals("complexity")) {
@@ -63,10 +61,9 @@ public class JSON_TO_XML {
                     parser.nextToken();
                     parser.nextToken();
 
-                    //loop until end of devStudios
                     while (parser.nextToken() != JsonToken.END_ARRAY) {
 
-                        //checker if we're looking at "{" / "}"
+                        //"{" / "}"
                         if (parser.getCurrentName() == null)
                             continue;
                         if (parser.getCurrentName().equals("name")) {
@@ -80,25 +77,20 @@ public class JSON_TO_XML {
         } else
             return null;
 
-
-        //Getting the token name
-
-
         return characters;
     }
 
     public static XML convert() {
         XML DOTA = new XML();
 
-        //getting started
         DOTA.addAttribute(characters.getCharacters().get(0).getAttribute());
 
 
         for (int i=0;i<characters.returnLength();i++){
-            //get current character in json
+
             JSONcharacter jsoNcharacter = characters.getCharacters().get(i);
 
-            //check if we need to create new attribute
+
             if (!checkIfAttrExists(jsoNcharacter.getAttribute(),DOTA.getAttributes()))
                 DOTA.addAttribute(jsoNcharacter.getAttribute());
 
@@ -112,25 +104,19 @@ public class JSON_TO_XML {
 
             for (int j=0;j<jsoNcharacter.getTypeOfAttacks().size();j++){
 
-                //get current TypeOfAttack in json
+                //get TypeOfAttack json
                 JSONTypeOfAttack jsonTypeOfAttack = jsoNcharacter.getTypeOfAttacks().get(j);
 
                 XMLTypeOfAttack XMLtype;
-                //check if we need to create new type
-                if (!checkIfTypeExists(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks())){
-                    //if it doesn't exist
-                    //update gamePublisher to avoid "place_holder"-----------------------------
-                    XMLattribute.setName(jsoNcharacter.getAttribute());
 
-                    //create new dev
+                if (!checkIfTypeExists(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks())){
+                    XMLattribute.setName(jsoNcharacter.getAttribute());
                     XMLattribute.addTypeOfAttack(jsonTypeOfAttack.getName());
                 }
                 XMLtype = findType(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks());
 
-                //add game
                 XMLtype.addCharacter(jsoNcharacter.getName(), jsoNcharacter.getComplexity());
 
-                //set all platforms
                 XMLcharacter XMLcharacter = XMLtype.getCharacters().get(XMLtype.returnLength()-1);
                 for (String xmlRole : XMLroles) {
                     XMLcharacter.addRole(xmlRole);
@@ -150,28 +136,22 @@ public class JSON_TO_XML {
     }
 
     private static void writeXml(OutputStream out, XML xmlClass) throws XMLStreamException {
-        //stax cursor
+
         XMLOutputFactory output = XMLOutputFactory.newInstance();
 
         XMLStreamWriter writer = output.createXMLStreamWriter(out,"utf-8");
 
         writer.writeStartDocument("utf-8", "1.0");
 
-        //header
         writer.writeStartElement("DOTA");
 
-
         writer.writeStartElement("Attributes");
-
-
-        // insides
 
         for (int i = 0; i < xmlClass.returnLength(); i++) {
             writer.writeStartElement("Attribute");
             writer.writeAttribute("name", xmlClass.getAttributes().get(i).getName());
 
             writer.writeStartElement("TypeOfAttacks");
-
 
             for (int j = 0; j < xmlClass.getAttributes().get(i).getTypeOfAttacks().size(); j++) {
                 XMLTypeOfAttack type = xmlClass.getAttributes().get(i).getTypeOfAttacks().get(j);
@@ -198,29 +178,25 @@ public class JSON_TO_XML {
                         writer.writeEndElement();
 
                     }
-                    writer.writeEndElement();//end roles
-                    writer.writeEndElement();//end character
+                    writer.writeEndElement();
+                    writer.writeEndElement();
 
                 }
-                writer.writeEndElement();//end characters
-                writer.writeEndElement();//end TypeOfAttack
+                writer.writeEndElement();
+                writer.writeEndElement();
             }
-            writer.writeEndElement();//end types
-            writer.writeEndElement();//end attribute
+            writer.writeEndElement();
+            writer.writeEndElement();
 
         }
 
-        writer.writeEndElement();//end attributes
-        writer.writeEndElement();//end DOTA
-
-
+        writer.writeEndElement();
+        writer.writeEndElement();
 
         writer.flush();
-
         writer.close();
     }
 
-    //region Utils
     private static boolean checkIfTypeExists(String name, ArrayList<XMLTypeOfAttack> types){
         for (XMLTypeOfAttack type : types) {
             if (type.getName().equals(name))
@@ -250,5 +226,4 @@ public class JSON_TO_XML {
         return null;
     }
 
-    //endregion
 }

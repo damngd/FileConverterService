@@ -18,10 +18,6 @@ import java.util.ArrayList;
 public class XML_TO_JSON extends DefaultHandler {
     private static final XML DOTA = new XML();
 
-    public static XML getDota() {
-        return DOTA;
-    }
-
     public static XML parseXML(String path) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
@@ -48,7 +44,7 @@ public class XML_TO_JSON extends DefaultHandler {
 
 
                     JSONcharacter checker = getCurrentCharacter(character.getName(),jsonCharacters.getCharacters() );
-                    //add current character to list, if it doesn't exist so far
+                    //add current character to list
                     if (checker==null) {
                         //add new character to JSON list
                         jsonCharacters.addCharacter(character.getName(), character.getComplexity(), Attribute.getName());
@@ -68,8 +64,6 @@ public class XML_TO_JSON extends DefaultHandler {
                         jsoNcharacter.addTypeOfAttack(type.getName());
                     }
                     else{
-                        //if we have current character in list, we need to add typeofattack studio to it
-
                         //adding typeofattack
                         checker.addTypeOfAttack(type.getName());
                     }
@@ -80,8 +74,6 @@ public class XML_TO_JSON extends DefaultHandler {
 
         return jsonCharacters;
     }
-
-
 
     public static void createJSON(JSON json, String path) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -102,7 +94,7 @@ public class XML_TO_JSON extends DefaultHandler {
 
     private static class XMLHandler extends DefaultHandler {
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes attributes)  {
             if (qName.equals("Attribute")) {
                 String name = attributes.getValue("name");
                 DOTA.addAttribute(name);

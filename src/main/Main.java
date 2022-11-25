@@ -6,22 +6,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        //String path;
-        //String newPath;
 
-
-
-        //if(args.length == 0) {
-        //    Scanner inputPath = new Scanner(System.in);
-         //   System.out.print("Path to file: ");
-         //   path = inputPath.nextLine();
-
-         //   Scanner inputNewPath = new Scanner(System.in);
-         //   System.out.print("Path to new file: ");
-          //  newPath = inputNewPath.nextLine();
-          //  args[0] = path;
-          //  args[1] = newPath;
-        //}
         FileConverter convert = new FileConverter();
         if (args.length != 0)
             if (args[0].contains(".json"))
@@ -31,7 +16,7 @@ public class Main {
             else
                 throw new Exception("Wrong");
         else {
-            convert.convertToJson("C:\\practice2\\FileConverterService\\src\\test\\TestXML.xml", "C:\\practice2\\FileConverterService\\Created.json");
+            convert.convertToXML("C:\\practice2\\FileConverterService\\src\\test\\TestJSON.json", "C:\\practice2\\FileConverterService\\Created2.xml");
 
         }
     }
