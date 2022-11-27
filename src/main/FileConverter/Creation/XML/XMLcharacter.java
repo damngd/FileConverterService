@@ -1,6 +1,14 @@
 package main.FileConverter.Creation.XML;
 
+import main.FileConverter.XML_TO_JSON;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class XMLcharacter {
     private String name;
@@ -40,4 +48,7 @@ public class XMLcharacter {
     public int returnLength(){
         return roles.size();
     }
+
+
+
 }

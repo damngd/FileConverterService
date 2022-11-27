@@ -14,118 +14,160 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class XML_TO_JSON extends DefaultHandler {
-    private static final XML DOTA = new XML();
+    private XML DOTA;
+    private SAXParserFactory factory = SAXParserFactory.newInstance();
+    private XmlHandler handler = new XmlHandler();
+    private ObjectMapper mapper = new ObjectMapper();
 
-    public static XML parseXML(String path) throws ParserConfigurationException, SAXException, IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
+    public XML parseXML(String path) throws ParserConfigurationException, SAXException, IOException {
         SAXParser parser = factory.newSAXParser();
-        XMLHandler handler = new XMLHandler();
+
         File fl = new File(path);
         parser.parse(fl, handler);
+
         return DOTA;
     }
 
-    public static JSON convert(){
-        JSON jsonCharacters = new JSON();
 
-        for (int i = 0; i< DOTA.returnLength(); i++) {
-            //get current attribute
-            XMLAttribute Attribute = DOTA.getAttributes().get(i);
+    public JSON convert(XML DOTA) {
+        JSON jsoncharacter = new JSON();
 
-            for (int j = 0; j<Attribute.returnLength(); j++){
-                //get current type
-                XMLTypeOfAttack type = Attribute.getTypeOfAttacks().get(j);
+        startConvert(DOTA, jsoncharacter);
 
-                for (int k = 0; k<type.returnLength(); k++) {
-                    //get current character
-                    XMLcharacter character = type.getCharacters().get(k);
+        return jsoncharacter;
+    }
+
+    private void startConvert(XML DOTA, JSON jsoncharacters) {
+        for (int i = 0; i < DOTA.returnLength(); i++) {
+            //get current publisher
+            XMLAttribute attribute = DOTA.getAttributes().get(i);
+
+            getAttribute(jsoncharacters, attribute);
+        }
+    }
+
+    private void getAttribute(JSON jsoncharacters, XMLAttribute attribute) {
+        for (int j = 0; j < attribute.returnLength(); j++) {
+            XMLTypeOfAttack type = attribute.getTypeOfAttacks().get(j);
+
+            getType(jsoncharacters, attribute, type);
+        }
+    }
+
+    private void getType(JSON jsoncharacters, XMLAttribute attribute, XMLTypeOfAttack type) {
+        for (int k = 0; k < type.returnLength(); k++) {
+            XMLcharacter character = type.getCharacters().get(k);
+
+            getGame(jsoncharacters, attribute, type, character);
+        }
+    }
+
+    private void getGame(JSON jsoncharacters, XMLAttribute attribute, XMLTypeOfAttack type, XMLcharacter character) {
+        JSONcharacter checker = getCurrentGame(character.getName(), jsoncharacters.getCharacters());
+        if (checker == null) {
+            createNewCharacter(jsoncharacters, attribute, type, character);
+        } else {
+            checker.addTypeOfAttack(type.getName(), type.getName2());
+        }
+    }
+    private JSONcharacter getCurrentGame(String nameToFind, ArrayList<JSONcharacter> listToLookIn) {
+        JSONcharacter foundcharacter = null;
+
+        for (JSONcharacter jsoNcharacter : listToLookIn) {
+            if (jsoNcharacter.getName().equals(nameToFind)) {
+                foundcharacter = jsoNcharacter;
+            }
+        }
+        return foundcharacter;
+    }
+
+    private void createNewCharacter(JSON jsoncharacters, XMLAttribute attribute, XMLTypeOfAttack type, XMLcharacter character) {
+        jsoncharacters.addCharacter(character.getName(), character.getComplexity(),attribute.getName());
+        JSONcharacter jsoNcharacter = jsoncharacters.getCharacters().get(jsoncharacters.returnLength() - 1);
+
+        getPlatform(character, jsoNcharacter);
+
+        jsoNcharacter.addTypeOfAttack(type.getName(), type.getName2());
+    }
+    private  void getPlatform(XMLcharacter character, JSONcharacter jsoncharacter) {
+        for (int l = 0; l < character.returnLength(); l++) {
+            XMLrole role = character.getRoles().get(l);
+
+            jsoncharacter.addRole(role.getName());
+        }
+    }
 
 
-                    JSONcharacter checker = getCurrentCharacter(character.getName(),jsonCharacters.getCharacters() );
-                    //add current character to list
-                    if (checker==null) {
-                        //add new character to JSON list
-                        jsonCharacters.addCharacter(character.getName(), character.getComplexity(), Attribute.getName());
 
-                        //create variable to collect roles
-                        JSONcharacter jsoNcharacter = jsonCharacters.getCharacters().get(jsonCharacters.returnLength() - 1);
+    public void createJson(JSON json, String path) throws IOException {
+        mapper.writeValue(new File(path), json);
+    }
 
-                        //collect all roles
-                        for (int l = 0; l < character.returnLength(); l++) {
-                            XMLrole role = character.getRoles().get(l);
-
-                            //add role to JSON.character list
-                            jsoNcharacter.addRole(role.getName());
-                        }
-
-                        //add TypeOfAttack to current game
-                        jsoNcharacter.addTypeOfAttack(type.getName());
-                    }
-                    else{
-                        //adding typeofattack
-                        checker.addTypeOfAttack(type.getName());
-                    }
-
+    private class XmlHandler extends DefaultHandler {
+        public void startDocument() {
+            DOTA = new XML();
+        }
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+            switch (qName) {
+                case "Attribute" -> {
+                    getAttributeSAX(attributes);
+                }
+                case "TypeOfAttack" -> {
+                    getTypeOfAttackSAX(attributes);
+                }
+                case "Character" -> {
+                    getCharacterSAX(attributes);
+                }
+                case "Role" -> {
+                    getRoleSAX(attributes);
                 }
             }
         }
 
-        return jsonCharacters;
-    }
-
-    public static void createJSON(JSON json, String path) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(new File(path),json);
-    }
-
-    private static JSONcharacter getCurrentCharacter(String nameToFind, ArrayList<JSONcharacter> listToLookIn){
-        JSONcharacter foundCharacter = null;
-
-        for (JSONcharacter jsoNcharacter : listToLookIn) {
-            if (jsoNcharacter.getName().equals(nameToFind))
-                foundCharacter = jsoNcharacter;
+        private void getAttributeSAX(Attributes attributes) {
+            String name = attributes.getValue("name");
+            DOTA.addAttribute(name);
         }
 
-        return foundCharacter;
-    }
+        private void getTypeOfAttackSAX(Attributes attributes) {
+            String name = attributes.getValue("name");
 
+            String name2 = attributes.getValue("name2");
+            DOTA.getAttributes().get(DOTA.returnLength() - 1).addTypeOfAttack(name,name2);
+        }
 
-    private static class XMLHandler extends DefaultHandler {
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes)  {
-            if (qName.equals("Attribute")) {
-                String name = attributes.getValue("name");
-                DOTA.addAttribute(name);
-            }
-            else if (qName.equals("TypeOfAttack")){
-                String name = attributes.getValue("name");
-                DOTA.getAttributes().get(DOTA.returnLength()-1).addTypeOfAttack(name);
-            }
-            else if (qName.equals("Character")){
-                String name = attributes.getValue("name");
+        private void getCharacterSAX(Attributes attributes) {
+            String name = attributes.getValue("name");
+            int complexity = Integer.parseInt(attributes.getValue("complexity"));
 
-                int complexity = Integer.parseInt(attributes.getValue("complexity"));
+            int DOTAListLength = DOTA.returnLength() - 1;
 
-                DOTA.getAttributes().get(DOTA.returnLength()-1).getTypeOfAttacks()
-                        .get(DOTA.getAttributes().get(DOTA.returnLength()-1).returnLength()-1).addCharacter(name,complexity);
-            }
-            else if (qName.equals("Role")){
-                String name = attributes.getValue("name");
+            XMLAttribute attribute = DOTA.getAttributes().get(DOTAListLength);
+            int attributeListLength = attribute.returnLength() - 1;
 
-                int DOTAListLength = DOTA.returnLength()-1;
+            XMLTypeOfAttack type = attribute.getTypeOfAttacks().get(attributeListLength);
 
-                XMLAttribute attribute = DOTA.getAttributes().get(DOTAListLength);
-                int attributeListLength = attribute.returnLength()-1;
+            type.addCharacter(name, complexity);
+        }
 
-                XMLTypeOfAttack typeOfAttack = attribute.getTypeOfAttacks().get(attributeListLength);
-                int TypeOfAttackListLength = typeOfAttack.returnLength()-1;
+        private void getRoleSAX(Attributes attributes) {
+            String name = attributes.getValue("name");
 
-                XMLcharacter character = typeOfAttack.getCharacters().get(TypeOfAttackListLength);
-                character.addRole(name);
+            int DOTAListLength = DOTA.returnLength() - 1;
 
-            }
+            XMLAttribute attribute = DOTA.getAttributes().get(DOTAListLength);
+            int attributeListLength = attribute.returnLength() - 1;
+
+            XMLTypeOfAttack type = attribute.getTypeOfAttacks().get(attributeListLength);
+            int typeListLength = type.returnLength() - 1;
+
+            XMLcharacter character = type.getCharacters().get(typeListLength);
+            character.addRole(name);
         }
     }
 }

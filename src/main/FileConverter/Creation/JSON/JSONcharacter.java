@@ -13,8 +13,8 @@ public class JSONcharacter {
         this.name = name;
         this.complexity = complexity;
         this.Attribute = Attribute;
-        this.roles = new ArrayList<JSONrole>();
-        this.TypeOfAttacks = new ArrayList<JSONTypeOfAttack>();
+        this.roles = new ArrayList<>();
+        this.TypeOfAttacks = new ArrayList<>();
     }
 
     public String getName() {
@@ -52,8 +52,11 @@ public class JSONcharacter {
     public void addRole(String name){
         roles.add(new JSONrole(name));
     }
-    public void addTypeOfAttack(String name){
-        TypeOfAttacks.add(new JSONTypeOfAttack(name));
+    public void addTypeOfAttack(String name, String name2){
+        TypeOfAttacks.add(new JSONTypeOfAttack(name,name2));
+    }
+    public JSONTypeOfAttack returnLastTypeOfAttack() {
+        return TypeOfAttacks.get(TypeOfAttacks.size() - 1);
     }
 
 }

@@ -9,10 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="692db1ec-b051-4b26-b922-6633ab255ffe" name="Changes" comment="Added Stream methods">
+    <list default="true" id="692db1ec-b051-4b26-b922-6633ab255ffe" name="Changes" comment="Fixes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/FileConverter/Creation/JSON/JSONTypeOfAttack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/Creation/JSON/JSONTypeOfAttack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/FileConverter/Creation/JSON/JSONcharacter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/Creation/JSON/JSONcharacter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLAttribute.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLAttribute.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLTypeOfAttack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLTypeOfAttack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLcharacter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/Creation/XML/XMLcharacter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/FileConverter/FileConverter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/FileConverter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/FileConverter/JSON_TO_XML.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/JSON_TO_XML.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/FileConverter/XML_TO_JSON.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FileConverter/XML_TO_JSON.java" afterDir="false" />
@@ -56,7 +60,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
@@ -98,7 +102,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669210386263</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Fixes">
+      <created>1669407133539</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1669407133539</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -112,7 +123,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="main" />
+                        <option value="jsontoxml" />
                       </list>
                     </value>
                   </entry>
@@ -129,6 +140,7 @@
     <MESSAGE value="Added xml_to_json" />
     <MESSAGE value="Added Convert class" />
     <MESSAGE value="Added Stream methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Stream methods" />
+    <MESSAGE value="Fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixes" />
   </component>
 </project>

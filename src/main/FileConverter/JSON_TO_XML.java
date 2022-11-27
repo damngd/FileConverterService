@@ -11,219 +11,266 @@ import main.FileConverter.Creation.XML.*;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class JSON_TO_XML {
-    private static JSON characters = new JSON();
+    private final JsonFactory factory = new JsonFactory();
+    private final XMLOutputFactory output = XMLOutputFactory.newInstance();
 
-    public static JSON parseJSON(String path) throws IOException {
+    public JSON parseJson(final String path) throws IOException {
+        JSON characters = new JSON();
+
+
         File fl = new File(path);
-        JsonFactory factory = new JsonFactory();
+        if (!fl.exists())
+            throw new IllegalArgumentException();
+
         JsonParser parser = factory.createParser(fl);
 
-        parser.nextToken();
-        parser.nextToken();
-
-        if (parser.nextToken() == JsonToken.START_ARRAY) {
-            //"]"
-            while (parser.nextToken() != JsonToken.END_ARRAY) {
-
-                //if"{" / "}"
-                if (parser.getCurrentName() == null)
-                    continue;
-                String key = parser.getCurrentName();
-
-                if (key.equals("name")) {
-                    characters.addCharacter("", -1, "");
-                    parser.nextToken();
-                    characters.returnLastCharacter().setName(parser.getText());
-                } else if (key.equals("complexity")) {
-                    parser.nextToken();
-                    characters.returnLastCharacter().setComplexity(Integer.parseInt(parser.getText()));
-                } else if (key.equals("attribute")) {
-                    parser.nextToken();
-                    characters.returnLastCharacter().setAttribute(parser.getText());
-                } else if (key.equals("roles")) {
-                    parser.nextToken();
-                    while (parser.nextToken() != JsonToken.END_ARRAY) {
-                        parser.nextToken();
-                        if (parser.getCurrentName().equals("name")) {
-                            parser.nextToken();
-                            characters.returnLastCharacter().addRole(parser.getText());
-                            parser.nextToken();
-                        }
-                    }
-                } else if (key.equals("typeOfAttacks")) {
-                    parser.nextToken();
-                    parser.nextToken();
-
-                    while (parser.nextToken() != JsonToken.END_ARRAY) {
-
-                        //"{" / "}"
-                        if (parser.getCurrentName() == null)
-                            continue;
-                        if (parser.getCurrentName().equals("name")) {
-                            parser.nextToken();
-                            characters.returnLastCharacter().addTypeOfAttack(parser.getText());
-                        }
-                    }
-                }
-
-            }
-        } else
-            return null;
+        startParsing(characters, parser);
 
         return characters;
     }
 
-    public static XML convert() {
-        XML DOTA = new XML();
 
-        DOTA.addAttribute(characters.getCharacters().get(0).getAttribute());
+    private void startParsing(final JSON characters, JsonParser parser) throws IOException {
+        parser.nextToken();
+        parser.nextToken();
 
+        if (parser.nextToken() != JsonToken.START_ARRAY)
+            throw new RuntimeException("Invalid file structure");
 
-        for (int i=0;i<characters.returnLength();i++){
+        // "]"
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
 
-            JSONcharacter jsoNcharacter = characters.getCharacters().get(i);
-
-
-            if (!checkIfAttrExists(jsoNcharacter.getAttribute(),DOTA.getAttributes()))
-                DOTA.addAttribute(jsoNcharacter.getAttribute());
-
-            XMLAttribute XMLattribute = findAttr(jsoNcharacter.getAttribute(),DOTA.getAttributes());
-
-            //collect roles
-            ArrayList<String> XMLroles = new ArrayList<>();
-            for (int j=0;j<jsoNcharacter.getRoles().size();j++){
-                XMLroles.add(jsoNcharacter.getRoles().get(j).getName());
+            //"{" / "}"
+            if (parser.getCurrentName() == null) {
+                continue;
             }
 
-            for (int j=0;j<jsoNcharacter.getTypeOfAttacks().size();j++){
-
-                //get TypeOfAttack json
-                JSONTypeOfAttack jsonTypeOfAttack = jsoNcharacter.getTypeOfAttacks().get(j);
-
-                XMLTypeOfAttack XMLtype;
-
-                if (!checkIfTypeExists(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks())){
-                    XMLattribute.setName(jsoNcharacter.getAttribute());
-                    XMLattribute.addTypeOfAttack(jsonTypeOfAttack.getName());
-                }
-                XMLtype = findType(jsonTypeOfAttack.getName(), XMLattribute.getTypeOfAttacks());
-
-                XMLtype.addCharacter(jsoNcharacter.getName(), jsoNcharacter.getComplexity());
-
-                XMLcharacter XMLcharacter = XMLtype.getCharacters().get(XMLtype.returnLength()-1);
-                for (String xmlRole : XMLroles) {
-                    XMLcharacter.addRole(xmlRole);
-                }
+            switch (parser.getCurrentName()) {
+                case "name" -> getName(characters, parser);
+                case "complexity" -> getComplexity(characters, parser);
+                case "roles" -> getRoles(characters, parser);
+                case "attribute" -> getAttribute(characters, parser);
+                case "typeOfAttacks" -> getTypeOfAttacks(characters, parser);
+                default -> throw new RuntimeException("Invalid file structure");
             }
         }
+    }
+
+    private static void getName(JSON characters, JsonParser parser) throws IOException {
+        characters.addCharacter("place_holder", 1, "place_holder");
+        parser.nextToken();
+        characters.returnLastCharacter().setName(parser.getText());
+    }
+
+    private static void getComplexity(JSON characters, JsonParser parser) throws IOException {
+        parser.nextToken();
+        characters.returnLastCharacter().setComplexity(Integer.parseInt(parser.getText()));
+    }
+
+    private static void getAttribute(JSON characters, JsonParser parser) throws IOException {
+        parser.nextToken();
+        characters.returnLastCharacter().setAttribute(parser.getText());
+    }
+
+    private static void getRoles(JSON characters, JsonParser parser) throws IOException {
+        parser.nextToken();
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            parser.nextToken();
+            if (parser.getCurrentName().equals("name")) {
+                parser.nextToken();
+                characters.returnLastCharacter().addRole(parser.getText());
+                parser.nextToken();
+            }
+        }
+    }
+
+    private static void getTypeOfAttacks(JSON characters, JsonParser parser) throws IOException {
+        parser.nextToken();
+        parser.nextToken();
+
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+
+            //"{" / "}"
+            if (parser.getCurrentName() == null) {
+                continue;
+            }
+
+            if (parser.getCurrentName().equals("name")) {
+                parser.nextToken();
+                characters.returnLastCharacter().addTypeOfAttack(parser.getText(), "place_holder");
+            } else if (parser.getCurrentName().equals("name2")) {
+                parser.nextToken();
+                characters.returnLastCharacter().returnLastTypeOfAttack().setName2(parser.getText());
+            }
+        }
+    }
+
+    //endregion
+
+    public XML convert(JSON characters) {
+        XML DOTA = new XML();
+
+        startConvert(characters, DOTA);
 
         return DOTA;
     }
 
-    public static void createXML(XML xmlClass, String path) {
-        try(FileOutputStream out = new FileOutputStream(path)){
-            writeXml(out, xmlClass);
-        } catch (IOException | XMLStreamException e) {
-            e.printStackTrace();
+    private void startConvert(JSON characters, XML DOTA) {
+        DOTA.addAttribute(characters.getCharacters().get(0).getAttribute());
+
+        for (int i = 0; i < characters.returnLength(); i++) {
+            //get current game in json
+            JSONcharacter jsonCharacter = characters.getCharacters().get(i);
+
+            XMLAttribute XmlAttribute = findAttribute(jsonCharacter, DOTA);
+
+            ArrayList<String> XmlRoles = collectRoles(jsonCharacter);
+
+            convertTypeOfAttacks(jsonCharacter, XmlAttribute, XmlRoles);
         }
     }
 
-    private static void writeXml(OutputStream out, XML xmlClass) throws XMLStreamException {
+    private static ArrayList<String> collectRoles(JSONcharacter jsonCharacter) {
+        ArrayList<String> XmlRoles = new ArrayList<>();
+        for (int j = 0; j < jsonCharacter.getRoles().size(); j++) {
+            XmlRoles.add(jsonCharacter.getRoles().get(j).getName());
+        }
+        return XmlRoles;
+    }
 
-        XMLOutputFactory output = XMLOutputFactory.newInstance();
+    private void convertTypeOfAttacks(JSONcharacter jsoNcharacter, XMLAttribute XmlAttribute, ArrayList<String> XmlRoles) {
+        for (int j = 0; j < jsoNcharacter.getTypeOfAttacks().size(); j++) {
 
-        XMLStreamWriter writer = output.createXMLStreamWriter(out,"utf-8");
+            JSONTypeOfAttack jsonTypeOfAttack = jsoNcharacter.getTypeOfAttacks().get(j);
 
-        writer.writeStartDocument("utf-8", "1.0");
+            XMLTypeOfAttack xmlTypeOfAttack = findType(jsonTypeOfAttack, XmlAttribute);
 
-        writer.writeStartElement("DOTA");
 
-        writer.writeStartElement("Attributes");
+            xmlTypeOfAttack.addCharacter(jsoNcharacter.getName(), jsoNcharacter.getComplexity());
 
-        for (int i = 0; i < xmlClass.returnLength(); i++) {
-            writer.writeStartElement("Attribute");
-            writer.writeAttribute("name", xmlClass.getAttributes().get(i).getName());
-
-            writer.writeStartElement("TypeOfAttacks");
-
-            for (int j = 0; j < xmlClass.getAttributes().get(i).getTypeOfAttacks().size(); j++) {
-                XMLTypeOfAttack type = xmlClass.getAttributes().get(i).getTypeOfAttacks().get(j);
-
-                writer.writeStartElement("TypeOfAttack");
-                writer.writeAttribute("name", type.getName());
-
-                writer.writeStartElement("Characters");
-
-                for (int k = 0; k < type.getCharacters().size(); k++) {
-                    XMLcharacter character = type.getCharacters().get(k);
-
-                    writer.writeStartElement("Character");
-                    writer.writeAttribute("name", character.getName());
-                    writer.writeAttribute("complexity", ((Integer)character.getComplexity()).toString());
-
-                    writer.writeStartElement("Roles");
-
-                    for (int l = 0; l < character.getRoles().size(); l++) {
-                        XMLrole xmLrole = character.getRoles().get(l);
-
-                        writer.writeStartElement("Role");
-                        writer.writeAttribute("name", xmLrole.getName());
-                        writer.writeEndElement();
-
-                    }
-                    writer.writeEndElement();
-                    writer.writeEndElement();
-
-                }
-                writer.writeEndElement();
-                writer.writeEndElement();
+            XMLcharacter XMLCharacter = xmlTypeOfAttack.getCharacters().get(xmlTypeOfAttack.returnLength() - 1);
+            for (String xmlRole : XmlRoles) {
+                XMLCharacter.addRole(xmlRole);
             }
-            writer.writeEndElement();
-            writer.writeEndElement();
+        }
+    }
 
+
+    private XMLTypeOfAttack findType(JSONTypeOfAttack type, XMLAttribute attribute) {
+        List<XMLTypeOfAttack> types = attribute.getTypeOfAttacks();
+        for (int i = types.size() - 1; i >= 0; i--) {
+            if (types.get(i).getName().equals(type.getName())) {
+                return types.get(i);
+            }
         }
 
-        writer.writeEndElement();
-        writer.writeEndElement();
+        attribute.addTypeOfAttack(type.getName(), type.getName2());
+
+        int index = attribute.returnLength();
+        return attribute.getTypeOfAttacks().get(index-1);
+    }
+
+    private XMLAttribute findAttribute (JSONcharacter jsonCharacter, XML xml) {
+        List<XMLAttribute> gameAttributes = xml.getAttributes();
+        for (int i = gameAttributes.size() - 1; i >= 0; i--) {
+            if (gameAttributes.get(i).getName().equals(jsonCharacter.getAttribute())) {
+                return gameAttributes.get(i);
+            }
+        }
+
+        xml.addAttribute(jsonCharacter.getAttribute());
+
+
+        int index = xml.returnLength();
+        return xml.getAttributes().get(index-1);
+    }
+
+
+
+    public void createXML(XML xmlUpperClassClass, String path) throws FileNotFoundException, XMLStreamException {
+        FileOutputStream out = new FileOutputStream(path);
+        writeXml(out, xmlUpperClassClass);
+    }
+
+    private void writeXml(OutputStream out,XML xmlUpperClassClass) throws XMLStreamException {
+        XMLStreamWriter writer = output.createXMLStreamWriter(out);
+
+        startWriting(xmlUpperClassClass, writer);
 
         writer.flush();
         writer.close();
     }
 
-    private static boolean checkIfTypeExists(String name, ArrayList<XMLTypeOfAttack> types){
-        for (XMLTypeOfAttack type : types) {
-            if (type.getName().equals(name))
-                return true;
-        }
-        return false;
-    }
-    private static XMLTypeOfAttack findType(String name, ArrayList<XMLTypeOfAttack> type){
-        for (int i=type.size()-1;i>=0;i--){
-            if (type.get(i).getName().equals(name))
-                return type.get(i);
-        }
-        return null;
-    }
-    private static boolean checkIfAttrExists(String name, ArrayList<XMLAttribute> attrs){
-        for (XMLAttribute attr : attrs) {
-            if (attr.getName().equals(name))
-                return true;
-        }
-        return false;
-    }
-    private static XMLAttribute findAttr(String name, ArrayList<XMLAttribute> attr){
-        for (int i=attr.size()-1;i>=0;i--){
-            if (attr.get(i).getName().equals(name))
-                return attr.get(i);
-        }
-        return null;
+    private static void startWriting(XML xmlUpperClassClass, XMLStreamWriter writer) throws XMLStreamException {
+        writer.writeStartDocument("utf-8", "1.0");
+
+        // header
+        writer.writeStartElement("DOTA");
+        writer.writeStartElement("Attributes");
+
+        writeAttributes(xmlUpperClassClass, writer);
+
+        writer.writeEndElement();
+        writer.writeEndElement();
     }
 
+    private static void writeAttributes(XML xmlUpperClassClass, XMLStreamWriter writer) throws XMLStreamException {
+        for (int i = 0; i < xmlUpperClassClass.returnLength(); i++) {
+            writer.writeStartElement("Attribute");
+            writer.writeAttribute("name", xmlUpperClassClass.getAttributes().get(i).getName());
+
+            writer.writeStartElement("typeOfAttacks");
+
+            writeTypeOfAttacks(xmlUpperClassClass, writer, i);
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
+    }
+
+    private static void writeTypeOfAttacks(XML xmlUpperClassClass, XMLStreamWriter writer, int i) throws XMLStreamException {
+        for (int j = 0; j < xmlUpperClassClass.getAttributes().get(i).getTypeOfAttacks().size(); j++) {
+            XMLTypeOfAttack dev = xmlUpperClassClass.getAttributes().get(i).getTypeOfAttacks().get(j);
+
+            writer.writeStartElement("typeOfAttack");
+            writer.writeAttribute("name", dev.getName());
+            writer.writeAttribute("name2", dev.getName2());
+
+            writer.writeStartElement("Characters");
+
+            writeGames(writer, dev);
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
+    }
+
+    private static void writeGames(XMLStreamWriter writer, XMLTypeOfAttack type) throws XMLStreamException {
+        for (int k = 0; k < type.getCharacters().size(); k++) {
+            XMLcharacter character = type.getCharacters().get(k);
+
+            writer.writeStartElement("Character");
+            writer.writeAttribute("name", character.getName());
+            writer.writeAttribute("Role", ((Integer) character.getComplexity()).toString());
+
+            writer.writeStartElement("Roles");
+
+            writeRoles(writer, character);
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
+    }
+
+    private static void writeRoles(XMLStreamWriter writer, XMLcharacter character) throws XMLStreamException {
+        for (int l = 0; l < character.getRoles().size(); l++) {
+            XMLrole xmlrole = character.getRoles().get(l);
+
+            writer.writeStartElement("Role");
+            writer.writeAttribute("name", xmlrole.getName());
+            writer.writeEndElement();
+        }
+    }
 }

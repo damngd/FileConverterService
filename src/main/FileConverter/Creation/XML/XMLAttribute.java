@@ -23,8 +23,8 @@ public class XMLAttribute {
         return name;
     }
 
-    public void addTypeOfAttack(String name) {
-        TypeOfAttacks.add(new XMLTypeOfAttack(name));
+    public void addTypeOfAttack(String name, String name2) {
+        TypeOfAttacks.add(new XMLTypeOfAttack(name, name2));
     }
 
     public ArrayList<XMLTypeOfAttack> getTypeOfAttacks() {
@@ -35,13 +35,6 @@ public class XMLAttribute {
         return TypeOfAttacks.size();
     }
 
-    public void addCharacter(List<String> type, String character, int complexity) {
-        Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
-        for (String typeOfAttack : type) {
-
-            stream.filter(x -> x.getName().equals(typeOfAttack)).forEach(x -> x.addCharacter(character, complexity));
-        }
-    }
 
     public void addToEach(String add) {
         Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
@@ -49,10 +42,6 @@ public class XMLAttribute {
         stream.forEach(x -> x.setName(x.getName() + " " + add));
     }
 
-    public void getSorted() {
-        Stream<XMLTypeOfAttack> stream = TypeOfAttacks.stream();
 
-        stream.forEach(x->x.getCharacters().sort(Comparator.comparing(XMLcharacter::getName)));
-    }
 
 }
